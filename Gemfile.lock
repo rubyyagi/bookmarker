@@ -233,15 +233,13 @@ DEPENDENCIES
   rails (~> 6.1.1)
   rspec-rails
   sass-rails (>= 6)
+  selenium-webdriver
   spring
   turbolinks (~> 5)
   tzinfo-data
   web-console (>= 4.1.0)
   webdrivers (~> 4.0)
   webpacker (~> 5.0)
-
-RUBY VERSION
-   ruby 2.7.1p83
 
 BUNDLED WITH
    2.1.4

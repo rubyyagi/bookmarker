@@ -97,7 +97,7 @@ jobs:
         continue-on-error: true
         run : |
           TESTFILES=$(./split_tests -glob "spec/**/*_spec.rb" -split-index=${{ matrix.ci_node_index }} -split-total=${{ matrix.ci_node_total }})
-          bundle exec rspec $TESTFILES -n 2 --test-options '--profile 10 --color --format progress --format RspecJunitFormatter --out /tmp/test-results/rspec.xml'
+          bundle exec rspec $TESTFILES
         env: 
           CIRCLE_NODE_INDEX: ${{ matrix.ci_node_index }}
       - name: Upload failed screenshots

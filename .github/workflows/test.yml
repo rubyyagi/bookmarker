@@ -1,0 +1,111 @@
+# .github/workflows/test.yml
+name: test
+on: [push, pull_request]
+jobs:
+  test:
+    needs: lint
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # Set N number of parallel jobs you want to run tests on.
+        # Use higher number if you have slow tests to split them on more parallel jobs.
+        # Remember to update ci_node_index below to 0..N-1
+        ci_node_total: [1]
+        # set N-1 indexes for parallel jobs
+        # When you run 2 parallel jobs then first job will have index 0, the second job will have index 1 etc
+        ci_node_index: [0]
+    env:
+      BUNDLE_JOBS: 2
+      BUNDLE_RETRY: 3
+      BUNDLE_PATH: vendor/bundle
+      PGHOST: 127.0.0.1
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      RAILS_ENV: test
+      RDS_HOSTNAME: localhost
+      RDS_USERNAME: postgres
+      RDS_PASSWORD: postgres
+      REDIS_URL: redis://localhost:6379
+    services:
+      postgres:
+        image: postgres:9.6-alpine
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        env: 
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: bateriku_test
+      redis:
+        image: redis
+        ports: ['6379:6379']
+        options: --entrypoint redis-server
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+      - name: Install Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '2.5'
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.13.1'
+      - name: Cache Ruby Gems
+        uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+      - name: Set up Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '8.x'
+      - name: Install dependencies
+        run: |
+          sudo apt-get -yqq install libpq-dev yarn
+      - name: Bundle Install
+        run: |
+          gem install bundler --no-ri --no-rdoc
+          bundle config path vendor/bundle
+          bundle check || bundle install --jobs 4 --retry 3
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Restore yarn cache
+        uses: actions/cache@v2
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Install yarn package
+        run: |
+          yarn install --pure-lockfile
+      - name: Database prepare
+        run: bundle exec rails db:prepare
+      - name: Make split_tests executeable
+        run: chmod +x ./split_tests
+      - name: Rspec test
+        id: rspec-test
+        continue-on-error: true
+        run : |
+          TESTFILES=$(./split_tests -glob "spec/**/*_spec.rb" -split-index=${{ matrix.ci_node_index }} -split-total=${{ matrix.ci_node_total }})
+          bundle exec rspec $TESTFILES -n 2 --test-options '--profile 10 --color --format progress --format RspecJunitFormatter --out /tmp/test-results/rspec.xml'
+        env: 
+          CIRCLE_NODE_INDEX: ${{ matrix.ci_node_index }}
+      - name: Upload failed screenshots
+        uses: actions/upload-artifact@master
+        with:
+          name: failed-screenshots
+          path: ${{ github.workspace }}/tmp/screenshots
+      - name: Notify failure if rspec test fail, workaround for continue-on-error
+        if: steps.rspec-test.outcome != 'success'
+        run: exit 1

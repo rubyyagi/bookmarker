@@ -65,7 +65,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
-          node-version: '8.x'
+          node-version: '10.x'
       - name: Install dependencies
         run: |
           sudo apt-get -yqq install libpq-dev yarn

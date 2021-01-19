@@ -50,7 +50,7 @@ jobs:
       - name: Install Ruby
         uses: actions/setup-ruby@v1
         with:
-          ruby-version: '2.5'
+          ruby-version: '2.7.x'
       - name: Install Go
         uses: actions/setup-go@v2
         with:

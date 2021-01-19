@@ -3,7 +3,6 @@ name: test
 on: [push, pull_request]
 jobs:
   test:
-    needs: lint
     runs-on: ubuntu-18.04
     strategy:
       fail-fast: false

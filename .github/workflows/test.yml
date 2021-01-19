@@ -71,7 +71,7 @@ jobs:
           sudo apt-get -yqq install libpq-dev yarn
       - name: Bundle Install
         run: |
-          gem install bundler --no-ri --no-rdoc
+          gem install bundler
           bundle config path vendor/bundle
           bundle check || bundle install --jobs 4 --retry 3
       - name: Get yarn cache directory path

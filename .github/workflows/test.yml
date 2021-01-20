@@ -66,6 +66,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '10.x'
+      - name: Setup chromedriver
+        uses: nanasess/setup-chromedriver@master
       - name: Install dependencies
         run: |
           sudo apt-get update -y

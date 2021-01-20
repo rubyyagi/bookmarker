@@ -12,7 +12,7 @@ end
 Capybara.register_driver :headless_chrome do |app|
   capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
     chromeOptions: {
-      args: %w(no-sandbox headless enable-features=NetworkService,NetworkServiceInProcess disable-gpu window-size=1280,800 remote-debugging-port=9222),
+      args: %w(no-sandbox headless disable-gpu window-size=1280,800 remote-debugging-port=9222),
     },
   )
 

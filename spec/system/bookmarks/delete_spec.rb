@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe 'delete bookmark', type: :system do
+RSpec.describe 'delete bookmark', type: :system, js: true do
   # this will create a 'bookmark' method, before each scenario is ran
   let!(:bookmark) { Bookmark.create(url: 'https://rubyyagi.com', title: 'Ruby Yagi') }
 

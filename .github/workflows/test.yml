@@ -105,6 +105,8 @@ jobs:
       #   run : |
       #     TESTFILES=$(./split_tests -glob "spec/**/*_spec.rb" -split-index=${{ matrix.ci_node_index }} -split-total=${{ matrix.ci_node_total }})
       #     xvfb-run bundle exec rspec $TESTFILES
+      - name: Make bin/ci executeable
+        run: chmod +x ./bin/ci
       - name: Run Rspec test
         id: rspec-test
         env:

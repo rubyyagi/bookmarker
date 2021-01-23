@@ -11,5 +11,4 @@ tests = Dir["spec/**/*_spec.rb"].
     i % ENV["CI_NODE_TOTAL"].to_i == ENV["CI_NODE_INDEX"].to_i
   end
 
-puts "Test files ran:\n#{tests.join("\n")}\n"
-exec "xvfb-run bundle exec rspec #{tests.join(" ")}"
+exec "xvfb-run bundle exec rspec -f d #{tests.join(" ")}"

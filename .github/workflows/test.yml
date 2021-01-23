@@ -34,7 +34,7 @@ jobs:
         env: 
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: bateriku_test
+          POSTGRES_DB: bookmarker_test
 
     steps:
       - name: Checkout branch

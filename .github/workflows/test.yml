@@ -22,10 +22,6 @@ jobs:
       PGUSER: postgres
       PGPASSWORD: postgres
       RAILS_ENV: test
-      RDS_HOSTNAME: localhost
-      RDS_USERNAME: postgres
-      RDS_PASSWORD: postgres
-      REDIS_URL: redis://localhost:6379
     services:
       postgres:
         image: postgres:9.6-alpine
@@ -39,29 +35,15 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: bateriku_test
-      redis:
-        image: redis
-        ports: ['6379:6379']
-        options: --entrypoint redis-server
 
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
       - name: Install Ruby
-        uses: actions/setup-ruby@v1
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.7.x'
-      # - name: Install Go
-      #   uses: actions/setup-go@v2
-      #   with:
-      #     go-version: '^1.13.1'
-      - name: Cache Ruby Gems
-        uses: actions/cache@v2
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-
+          ruby-version: '2.7'
+          bundler-cache: true
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
@@ -97,14 +79,6 @@ jobs:
           yarn install --pure-lockfile
       - name: Database prepare
         run: bundle exec rails db:prepare
-      - name: Make split_tests executeable
-        run: chmod +x ./split_tests
-      # - name: Rspec test
-      #   id: rspec-test
-      #   continue-on-error: true
-      #   run : |
-      #     TESTFILES=$(./split_tests -glob "spec/**/*_spec.rb" -split-index=${{ matrix.ci_node_index }} -split-total=${{ matrix.ci_node_total }})
-      #     xvfb-run bundle exec rspec $TESTFILES
       - name: Make bin/ci executeable
         run: chmod +x ./bin/ci
       - name: Run Rspec test

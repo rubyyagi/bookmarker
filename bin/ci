@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+require "date"
+
+tests = Dir["spec/**/*_spec.rb"].
+  sort.
+  # Add some randomization. Different test order every day.
+  shuffle(random: ENV['GITHUB_SHA']).
+  select.
+  with_index do |el, i|
+    i % ENV["CI_NODE_TOTAL"].to_i == ENV["CI_NODE_INDEX"].to_i
+  end
+
+exec "xvfb-run bundle exec rspec #{tests.join(" ")}"

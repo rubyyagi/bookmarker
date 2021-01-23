@@ -51,10 +51,10 @@ jobs:
         uses: actions/setup-ruby@v1
         with:
           ruby-version: '2.7.x'
-      - name: Install Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: '^1.13.1'
+      # - name: Install Go
+      #   uses: actions/setup-go@v2
+      #   with:
+      #     go-version: '^1.13.1'
       - name: Cache Ruby Gems
         uses: actions/cache@v2
         with:
@@ -99,12 +99,23 @@ jobs:
         run: bundle exec rails db:prepare
       - name: Make split_tests executeable
         run: chmod +x ./split_tests
-      - name: Rspec test
+      # - name: Rspec test
+      #   id: rspec-test
+      #   continue-on-error: true
+      #   run : |
+      #     TESTFILES=$(./split_tests -glob "spec/**/*_spec.rb" -split-index=${{ matrix.ci_node_index }} -split-total=${{ matrix.ci_node_total }})
+      #     xvfb-run bundle exec rspec $TESTFILES
+      - name: Run Rspec test
         id: rspec-test
+        env:
+          # Specifies how many jobs you would like to run in parallel,
+          # used for partitioning
+          CI_NODE_TOTAL: ${{ matrix.ci_node_total }}
+          # Use the index from matrix as an environment variable
+          CI_NODE_INDEX: ${{ matrix.ci_node_index }}
         continue-on-error: true
         run : |
-          TESTFILES=$(./split_tests -glob "spec/**/*_spec.rb" -split-index=${{ matrix.ci_node_index }} -split-total=${{ matrix.ci_node_total }})
-          xvfb-run bundle exec rspec $TESTFILES
+          ./bin/ci
       - name: Upload failed screenshots
         uses: actions/upload-artifact@master
         with:

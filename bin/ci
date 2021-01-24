@@ -4,7 +4,7 @@ require "date"
 
 tests = Dir["spec/**/*_spec.rb"].
   sort.
-  # Add some randomization. Different test order every day.
+  # Add randomization seed based on SHA of each commit
   shuffle(random: Random.new(ENV['GITHUB_SHA'].to_i(16))).
   select.
   with_index do |el, i|
